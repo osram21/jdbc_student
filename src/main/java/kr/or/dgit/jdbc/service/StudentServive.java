@@ -2,13 +2,17 @@ package kr.or.dgit.jdbc.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import kr.or.dgit.jdbc.dao.StudentDao;
 import kr.or.dgit.jdbc.dto.Student;
 import kr.or.dgit.jdbc.util.ConnectionFactory;
+import kr.or.dgit.jdbc.util.JdbcUtil;
 
 public class StudentServive implements StudentDao{
 	private static final StudentServive instance = new StudentServive();
@@ -26,21 +30,26 @@ public class StudentServive implements StudentDao{
 	}
 
 	@Override
-	public void insertStudent(Student student) {
+	public int insertStudent(Student student) {
 		Connection connection = ConnectionFactory.getConnection();
-		PreparedStatement pstmt;
+		PreparedStatement pstmt = null;
 		String sql = "insert into student values(?,?,?,?)";
-		
+		int res = -1;
 		try {
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setInt(1, student.getStudId());
 			pstmt.setString(2, student.getName());
 			pstmt.setString(3, student.getEmail());
 			pstmt.setTimestamp(4, new Timestamp(student.getDob().getTime()));
+		
+			res = pstmt.executeUpdate();
 			System.out.println(pstmt);
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			JdbcUtil.close(pstmt);
 		}
+		return res;
 	}
 
 	@Override
@@ -51,8 +60,28 @@ public class StudentServive implements StudentDao{
 
 	@Override
 	public List<Student> findAllStudents() {
-		// TODO Auto-generated method stub
-		return null;
+		Connection connection = ConnectionFactory.getConnection();
+		
+		List<Student> lists = new ArrayList<>();
+		
+		String sql = "select stud id, name, email, dob from student";
+		try(PreparedStatement pstmt = connection.prepareStatement(sql);
+				ResultSet rs = pstmt.executeQuery()){
+			while(rs.next()){
+				lists.add(getStudent(rs));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		return lists;
+	}
+
+	private Student getStudent(ResultSet rs) throws SQLException{
+		int studId = rs.getInt("stud_id");
+		String name = rs.getString("name");
+		String email = rs.getString("email");
+		Date dob = rs.getDate("dob");
+		return new Student(studId, name, email, dob);
 	}
 	
 }

@@ -31,6 +31,7 @@ public class ConnectionFactory {
 		} catch (ClassNotFoundException e) {
 			System.err.printf("MySQL Driver not Found!!");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 

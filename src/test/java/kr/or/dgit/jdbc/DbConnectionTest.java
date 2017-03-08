@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.sql.Connection;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class DbConnectionTest {
 	}
 	@Test
 	public void test() {
-		fail("Not yet implemented");
+		Assert.assertNotNull(connection);
 	}
 
 }
